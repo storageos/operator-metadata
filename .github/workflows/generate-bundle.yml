@@ -1,0 +1,59 @@
+name: Generate Bundle
+
+on:
+  workflow_dispatch:
+    # Enable manual trigger of this action.
+    inputs:
+      targetDir:
+        description: Target bundle directory to update with version.
+        default: storageos2/2.3.0
+        required: true
+      channels:
+        description: List of bundle release channels.
+        default: stable
+        required: true
+      packageName:
+        description: OLM package name.
+        default: storageos2
+        required: true
+      operatorRepo:
+        description: Operator git repo to extract metadata from.
+        default: https://github.com/storageos/cluster-operator
+        required: true
+      operatorBranch:
+        description: Operator git repo branch or tag to clone.
+        required: true
+      operatorManifestDir:
+        description: Path to the manifests directory in the operator repo.
+        default: bundle/manifests
+        required: true
+
+jobs:
+  generate-bundle:
+    runs-on: ubuntu-latest
+    name: Generate operator bundle
+    steps:
+      - uses: actions/checkout@v2
+      - name: olm-bundle action
+        uses: darkowlzz/olm-bundle@master
+        id: olm
+        with:
+          outputDir: ${{ github.event.inputs.targetDir }}
+          channels: ${{ github.event.inputs.channels }}
+          package: ${{ github.event.inputs.packageName }}
+          operatorRepo: ${{ github.event.inputs.operatorRepo }}
+          operatorBranch: ${{ github.event.inputs.operatorBranch }}
+          operatorManifestsDir: ${{ github.event.inputs.operatorManifestDir }}
+      - name: run tree
+        run: sudo apt-get install tree -y && tree ${{ github.event.inputs.packageName }}
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3.4.0
+        id: cpr
+        with:
+          commit-message: "[automated] Update bundle ${{ github.event.inputs.targetDir }}"
+          branch: bundle-generate
+          delete-branch: true
+          title: "[automated] Update bundle ${{ github.event.inputs.targetDir }}"
+      - name: Pull request info
+        run: |
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
