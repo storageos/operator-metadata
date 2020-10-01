@@ -16,6 +16,14 @@ INDEX_IMAGE_NAME ?= storageos/operator-index
 INDEX_IMAGE ?= $(INDEX_IMAGE_NAME):$(INDEX_VERSION)
 CONTAINER_TOOL ?= docker
 
+# Variables for olm-bundle generation.
+OLM_BUNDLE_ACTION_IMAGE ?= ghcr.io/darkowlzz/olm-bundle:test
+OLM_BUNDLE_ACTION_WORKSPACE ?= /github/workspace
+CHANNELS ?= stable
+OPERATOR_REPO ?= https://github.com/storageos/cluster-operator
+OPERATOR_BRANCH ?= master
+OPERATOR_MANIFESTS_DIR ?= bundle/manifests
+
 # The help will print out all targets with their descriptions organized bellow their categories. The categories are represented by `##@` and the target descriptions by `##`.
 # The awk commands is responsable to read the entire set of makefiles included in this invocation, looking for lines of the file as xyz: ## something, and then pretty-format the target and help. Then, if there's a line with ##@ something, that gets pretty-printed as a category.
 # More info over the usage of ANSI control characters for terminal formatting: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
@@ -34,7 +42,7 @@ ifeq ($(BUNDLE_VERSION),)
 	$(error BUNDLE_VERSION is a required argument)
 endif
 	cd $(PACKAGE_NAME); \
-	docker build -f $(BUNDLE_DOCKERFILE) -t $(BUNDLE_IMAGE) .
+	$(CONTAINER_TOOL) build -f $(BUNDLE_DOCKERFILE) -t $(BUNDLE_IMAGE) .
 
 index-build: opm ## Build index image (INDEX_BUNDLES required)
 ifeq ($(INDEX_BUNDLES),)
@@ -43,6 +51,23 @@ endif
 	$(OPM) index add --bundles $(INDEX_BUNDLES) \
 		--tag $(INDEX_IMAGE) \
 		-c $(CONTAINER_TOOL)
+
+generate-bundle: ## Generate new versioned bundle (BUNDLE_VERSION required)
+# TODO: Make PACKAGE_NAME required when multiple bundles are added. Since
+# there's only one bundle, check for BUNDLE_VERSION only for now.
+ifeq ($(BUNDLE_VERSION),)
+	$(error BUNDLE_VERSION is a required argument)
+endif
+	$(CONTAINER_TOOL) run --rm \
+		-v $(shell pwd):$(OLM_BUNDLE_ACTION_WORKSPACE) \
+		-e OUTPUT_DIR=$(PACKAGE_NAME)/$(BUNDLE_VERSION) \
+		-e CHANNELS=$(CHANNELS) \
+		-e PACKAGE=$(PACKAGE_NAME) \
+		-e OPERATOR_REPO=$(OPERATOR_REPO) \
+		-e OPERATOR_BRANCH=$(OPERATOR_BRANCH) \
+		-e OPERATOR_MANIFESTS_DIR=$(OPERATOR_MANIFESTS_DIR) \
+		-u "$(shell id -u):$(shell id -g)" \
+		$(OLM_BUNDLE_ACTION_IMAGE)
 
 ##@ Tools
 opm: ## Install opm.
