@@ -44,8 +44,8 @@ jobs:
           operatorRepo: ${{ github.event.inputs.operatorRepo }}
           operatorBranch: ${{ github.event.inputs.operatorBranch }}
           operatorManifestsDir: ${{ github.event.inputs.operatorManifestDir }}
-      - name: run tree
-        run: sudo apt-get install tree -y && tree ${{ github.event.inputs.packageName }}
+      - name: Tree output
+        run: echo "${{ steps.olm.outputs.tree }}"
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3.4.0
         id: cpr
@@ -54,6 +54,10 @@ jobs:
           branch: bundle-generate
           delete-branch: true
           title: "[automated] Update bundle ${{ github.event.inputs.targetDir }}"
+          body: |
+            ```
+            ${{ steps.olm.outputs.tree }}
+            ```
       - name: Pull request info
         run: |
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
