@@ -1,0 +1,54 @@
+name: Test index image
+
+on:
+  push:
+    branch:
+      - master
+
+env:
+  BUNDLE_VERSION: "2.2.0"
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    name: Build index image
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Print all the env vars
+        run: env
+      - name: Set bundle image name
+        run: echo "BUNDLE_IMAGE_NAME=localhost:5000/storageos/operator-bundle" >> $GITHUB_ENV
+      - name: Set bundle image with tag
+        run: echo "BUNDLE_IMAGE=${{ env.BUNDLE_IMAGE_NAME }}:v${{ env.BUNDLE_VERSION }}" >> $GITHUB_ENV
+      - name: Set index image name
+        run: echo "INDEX_IMAGE=ghcr.io/storageos/operator-index:${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.CR_USER }}
+          password: ${{ secrets.CR_PAT }}
+      - name: Build bundle image
+        run: |
+          make bundle-build
+          docker push ${{ env.BUNDLE_IMAGE }}
+      - name: Build catalog index image
+        run: |
+          make index-build INDEX_BUNDLES=${{ env.BUNDLE_IMAGE }} INDEX_IMAGE=${{ env.INDEX_IMAGE }}
+          docker push ${{ env.INDEX_IMAGE }}
+
+  test-image:
+    runs-on: ubuntu-latest
+    name: Test index image
+    needs: build-image
+    steps:
+      - name: Set index image name
+        run: echo "INDEX_IMAGE=ghcr.io/storageos/operator-index:${GITHUB_RUN_ID}-${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+      - name: Pull index image
+        run: docker pull ${{ env.INDEX_IMAGE }}
