@@ -48,7 +48,7 @@ jobs:
           operatorBranch: ${{ github.event.inputs.operatorBranch }}
           operatorManifestsDir: ${{ github.event.inputs.operatorManifestDir }}
       - name: Update related images
-        uses: darkowlzz/related-image-update@master
+        uses: darkowlzz/related-image-update@v0.1.0
         with:
           imageListFile: ${{ env.IMAGE_LIST }}
           targetFile: ${{ env.OUTPUT_DIR }}/manifests/storageosoperator.clusterserviceversion.yaml
@@ -65,7 +65,7 @@ jobs:
           delete-branch: true
           title: "[automated] Update bundle ${{ env.OUTPUT_DIR }}"
           body: |
-            Generated bundle with related images from ${{ env.IMAGE_LIST }}.
+            Generated bundle with related images from `${{ env.IMAGE_LIST }}`.
 
             ```
             ${{ steps.olm.outputs.tree }}
