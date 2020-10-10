@@ -24,6 +24,12 @@ OPERATOR_REPO ?= https://github.com/storageos/cluster-operator
 OPERATOR_BRANCH ?= master
 OPERATOR_MANIFESTS_DIR ?= bundle/manifests
 
+# Variables for updating related images.
+RELATED_IMAGE_UPDATE_IMAGE ?= ghcr.io/darkowlzz/related-image-update:test
+CSV_PATH=manifests/storageosoperator.clusterserviceversion.yaml
+TARGET_DEPLOYMENT_NAME=storageos-operator
+TARGET_CONTAINER_NAME=storageos-operator
+
 # The help will print out all targets with their descriptions organized bellow their categories. The categories are represented by `##@` and the target descriptions by `##`.
 # The awk commands is responsable to read the entire set of makefiles included in this invocation, looking for lines of the file as xyz: ## something, and then pretty-format the target and help. Then, if there's a line with ##@ something, that gets pretty-printed as a category.
 # More info over the usage of ANSI control characters for terminal formatting: https://en.wikipedia.org/wiki/ANSI_escape_code#SGR_parameters
@@ -68,6 +74,19 @@ endif
 		-e OPERATOR_MANIFESTS_DIR=$(OPERATOR_MANIFESTS_DIR) \
 		-u "$(shell id -u):$(shell id -g)" \
 		$(OLM_BUNDLE_ACTION_IMAGE)
+
+related-images: ## Update related images in a bundle (BUNDLE_VERSION required)
+ifeq ($(BUNDLE_VERSION),)
+	$(error BUNDLE_VERSION is a required argument)
+endif
+	$(CONTAINER_TOOL) run --rm \
+		-v $(shell pwd):$(OLM_BUNDLE_ACTION_WORKSPACE) \
+		-e IMAGE_LIST_FILE=$(PACKAGE_NAME)/imagelist-$(BUNDLE_VERSION).yaml \
+		-e TARGET_FILE=$(PACKAGE_NAME)/$(BUNDLE_VERSION)/$(CSV_PATH) \
+		-e TARGET_DEPLOYMENT_NAME=$(TARGET_DEPLOYMENT_NAME) \
+		-e TARGET_CONTAINER_NAME=$(TARGET_CONTAINER_NAME) \
+		-u "$(shell id -u):$(shell id -g)" \
+		$(RELATED_IMAGE_UPDATE_IMAGE)
 
 ##@ Tools
 opm: ## Install opm.

@@ -4,17 +4,16 @@ on:
   workflow_dispatch:
     # Enable manual trigger of this action.
     inputs:
-      targetDir:
-        description: Target bundle directory to update with version.
-        default: storageos2/2.3.0
+      packageName:
+        description: OLM package name.
+        default: storageos2
+        required: true
+      bundleVersion:
+        description: Bundle version to create or update, e.g. `2.2.0`.
         required: true
       channels:
         description: List of bundle release channels.
         default: stable
-        required: true
-      packageName:
-        description: OLM package name.
-        default: storageos2
         required: true
       operatorRepo:
         description: Operator git repo to extract metadata from.
@@ -34,27 +33,40 @@ jobs:
     name: Generate operator bundle
     steps:
       - uses: actions/checkout@v2
+      - name: Set target bundle path
+        run: echo "OUTPUT_DIR=${{ github.event.inputs.packageName }}/${{ github.event.inputs.bundleVersion }}" >> $GITHUB_ENV
+      - name: Set image list path
+        run: echo "IMAGE_LIST=${{ github.event.inputs.packageName }}/imagelist-${{ github.event.inputs.bundleVersion }}.yaml" >> $GITHUB_ENV
       - name: olm-bundle action
         uses: darkowlzz/olm-bundle@master
         id: olm
         with:
-          outputDir: ${{ github.event.inputs.targetDir }}
+          outputDir: ${{ env.OUTPUT_DIR }}
           channels: ${{ github.event.inputs.channels }}
           package: ${{ github.event.inputs.packageName }}
           operatorRepo: ${{ github.event.inputs.operatorRepo }}
           operatorBranch: ${{ github.event.inputs.operatorBranch }}
           operatorManifestsDir: ${{ github.event.inputs.operatorManifestDir }}
+      - name: Update related images
+        uses: darkowlzz/related-image-update@master
+        with:
+          imageListFile: ${{ env.IMAGE_LIST }}
+          targetFile: ${{ env.OUTPUT_DIR }}/manifests/storageosoperator.clusterserviceversion.yaml
+          deploymentName: storageos-operator
+          containerName: storageos-operator
       - name: Tree output
         run: echo "${{ steps.olm.outputs.tree }}"
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3.4.0
         id: cpr
         with:
-          commit-message: "[automated] Update bundle ${{ github.event.inputs.targetDir }}"
+          commit-message: "[automated] Update bundle ${{ env.OUTPUT_DIR }}"
           branch: bundle-generate
           delete-branch: true
-          title: "[automated] Update bundle ${{ github.event.inputs.targetDir }}"
+          title: "[automated] Update bundle ${{ env.OUTPUT_DIR }}"
           body: |
+            Generated bundle with related images from ${{ env.IMAGE_LIST }}.
+
             ```
             ${{ steps.olm.outputs.tree }}
             ```
