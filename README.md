@@ -11,6 +11,33 @@ be used to create index image using
 [operator-registry](https://github.com/operator-framework/operator-registry)
 tool, `opm`.
 
+### Generate a new versioned bundle
+
+Before generating a new bundle, create an image list file with all the related
+images to be populated in the bundle. These related images are the default
+images used by the operator. The image list must be created inside a package
+directory with the name format `imagelist-<bundle-version>.yaml`, e.g.
+`imagelist-2.2.0.yaml`. The images should be listed as:
+
+```yaml
+- name: RELATED_IMAGE_STORAGEOS_NODE
+  value: registry.connect.redhat.com/storageos/node:v2.2.0
+- name: RELATED_IMAGE_STORAGEOS_INIT
+  value: registry.connect.redhat.com/storageos/init:v2.0.0
+...
+```
+
+Once the image list has been created, to create a bundle or update an existing
+bundle, run:
+
+```console
+$ make generate-bundle BUNDLE_VERSION=<version-number> OPERATOR_BRANCH=v<version-number>
+```
+
+This will run the bundle generator tool which will clone the default operator
+repo at the given branch/tag and use the bundle files from othat version of
+operator to create or update a versioned bundle in this repo.
+
 ### Build a bundle image
 
 Build a bundle image for `storageos2` package for version `2.2.0`:
