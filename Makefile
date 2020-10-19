@@ -17,15 +17,19 @@ INDEX_IMAGE ?= $(INDEX_IMAGE_NAME):$(INDEX_VERSION)
 CONTAINER_TOOL ?= docker
 
 # Variables for olm-bundle generation.
-OLM_BUNDLE_ACTION_IMAGE ?= ghcr.io/darkowlzz/olm-bundle:test
+OLM_BUNDLE_ACTION_VERSION ?= v0.2.0
+OLM_BUNDLE_ACTION_IMAGE ?= ghcr.io/darkowlzz/olm-bundle:$(OLM_BUNDLE_ACTION_VERSION)
 OLM_BUNDLE_ACTION_WORKSPACE ?= /github/workspace
 CHANNELS ?= stable
+DEFAULT_CHANNEL ?= stable
 OPERATOR_REPO ?= https://github.com/storageos/cluster-operator
 OPERATOR_BRANCH ?= master
 OPERATOR_MANIFESTS_DIR ?= bundle/manifests
+DOCKERFILE_LABELS_FILE ?= storageos2/common-labels.txt
 
 # Variables for updating related images.
-RELATED_IMAGE_UPDATE_IMAGE ?= ghcr.io/darkowlzz/related-image-update:test
+RELATED_IMAGE_UPDATE_VERSION ?= v0.2.0
+RELATED_IMAGE_UPDATE_IMAGE ?= ghcr.io/darkowlzz/related-image-update:$(RELATED_IMAGE_UPDATE_VERSION)
 CSV_PATH=manifests/storageosoperator.clusterserviceversion.yaml
 TARGET_DEPLOYMENT_NAME=storageos-operator
 TARGET_CONTAINER_NAME=storageos-operator
@@ -68,10 +72,12 @@ endif
 		-v $(shell pwd):$(OLM_BUNDLE_ACTION_WORKSPACE) \
 		-e OUTPUT_DIR=$(PACKAGE_NAME)/$(BUNDLE_VERSION) \
 		-e CHANNELS=$(CHANNELS) \
+		-e DEFAULT_CHANNEL=$(DEFAULT_CHANNEL) \
 		-e PACKAGE=$(PACKAGE_NAME) \
 		-e OPERATOR_REPO=$(OPERATOR_REPO) \
 		-e OPERATOR_BRANCH=$(OPERATOR_BRANCH) \
 		-e OPERATOR_MANIFESTS_DIR=$(OPERATOR_MANIFESTS_DIR) \
+		-e DOCKERFILE_LABELS_FILE=$(DOCKERFILE_LABELS_FILE) \
 		-u "$(shell id -u):$(shell id -g)" \
 		$(OLM_BUNDLE_ACTION_IMAGE)
 

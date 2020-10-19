@@ -15,6 +15,10 @@ on:
         description: List of bundle release channels.
         default: stable
         required: true
+      defaultChannel:
+        description: Default bundle release channel.
+        default: stable
+        required: true
       operatorRepo:
         description: Operator git repo to extract metadata from.
         default: https://github.com/storageos/cluster-operator
@@ -38,17 +42,19 @@ jobs:
       - name: Set image list path
         run: echo "IMAGE_LIST=${{ github.event.inputs.packageName }}/imagelist-${{ github.event.inputs.bundleVersion }}.yaml" >> $GITHUB_ENV
       - name: olm-bundle action
-        uses: darkowlzz/olm-bundle@master
+        uses: darkowlzz/olm-bundle@v0.2.0
         id: olm
         with:
           outputDir: ${{ env.OUTPUT_DIR }}
           channels: ${{ github.event.inputs.channels }}
+          defaultChannel: ${{ github.event.inputs.defaultChannel }}
           package: ${{ github.event.inputs.packageName }}
           operatorRepo: ${{ github.event.inputs.operatorRepo }}
           operatorBranch: ${{ github.event.inputs.operatorBranch }}
           operatorManifestsDir: ${{ github.event.inputs.operatorManifestDir }}
+          dockerfileLabels: storageos2/common-labels.txt
       - name: Update related images
-        uses: darkowlzz/related-image-update@v0.1.0
+        uses: darkowlzz/related-image-update@v0.2.0
         with:
           imageListFile: ${{ env.IMAGE_LIST }}
           targetFile: ${{ env.OUTPUT_DIR }}/manifests/storageosoperator.clusterserviceversion.yaml

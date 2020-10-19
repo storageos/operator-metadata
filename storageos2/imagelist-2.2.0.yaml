@@ -18,3 +18,5 @@
   value: registry.connect.redhat.com/storageos/csi-livenessprobe:v1.1.0
 - name: RELATED_IMAGE_KUBE_SCHEDULER
   value: registry.connect.redhat.com/storageos/kube-scheduler:v1.17.0
+- name: OPERATOR_IMAGE
+  value: registry.connect.redhat.com/storageos/cluster-operator2:v2.2.0-4
