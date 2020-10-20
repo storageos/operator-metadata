@@ -22,7 +22,7 @@ jobs:
       - name: Find changed bundle and set variables
         run: |
           source scripts/find-changed-bundle.sh
-          echo "BUNDLE_VERSION=$BUNDLE_VERSION" >> $GITHUB_ENV
+          echo "BUNDLE_VERSION=$BUNDLE_VER" >> $GITHUB_ENV
       - name: Set bundle image name
         run: echo "BUNDLE_IMAGE_NAME=ghcr.io/storageos/operator-bundle" >> $GITHUB_ENV
       - name: Set versioned bundle image with tag
