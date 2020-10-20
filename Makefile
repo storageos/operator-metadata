@@ -94,6 +94,13 @@ endif
 		-u "$(shell id -u):$(shell id -g)" \
 		$(RELATED_IMAGE_UPDATE_IMAGE)
 
+##@ Test
+opm-validate: opm ## Run opm validate on a bundle (BUNDLE_IMAGE required)
+ifeq ($(BUNDLE_IMAGE),)
+	$(error BUNDLE_IMAGE is a required argument)
+endif
+	$(OPM) alpha bundle validate -t $(BUNDLE_IMAGE)
+
 ##@ Tools
 opm: ## Install opm.
 	@mkdir -p bin
