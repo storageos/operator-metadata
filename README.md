@@ -1,5 +1,7 @@
 # operator-metadata
 
+[![Validate bundle](https://github.com/storageos/operator-metadata/workflows/Validate%20bundle/badge.svg)](https://github.com/storageos/operator-metadata/actions?query=workflow%3A%22Validate+bundle%22)
+
 The StorageOS Operator metadata for Kubernetes and OpenShift.
 
 ## OLM Bundle
@@ -160,4 +162,19 @@ Get the status of the installed operator:
 $ kubectl operator list -A
 PACKAGE     NAMESPACE  SUBSCRIPTION  INSTALLED CSV             CURRENT CSV               STATUS         AGE
 storageos2  default    storageos2    storageosoperator.v2.2.0  storageosoperator.v2.2.0  AtLatestKnown  13m
+```
+
+## Maintenance
+
+Validate a specific bundle image using opm:
+
+```
+$ make opm-validate BUNDLE_IMAGE=storageos/operator-bundle:test
+```
+
+Validate a specific bundle with the [OPA](https://www.openpolicyagent.org/)
+based repo policies using [conftest](https://www.conftest.dev):
+
+```
+$ make conftest-validate BUNDLE_VERSION=2.2.0
 ```
