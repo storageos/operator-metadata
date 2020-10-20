@@ -66,10 +66,10 @@ jobs:
         uses: peter-evans/create-pull-request@v3.4.0
         id: cpr
         with:
-          commit-message: "[automated] Update bundle ${{ env.OUTPUT_DIR }}"
-          branch: bundle-generate
+          commit-message: "Update bundle ${{ env.OUTPUT_DIR }}"
+          branch: generated-bundle
           delete-branch: true
-          title: "[automated] Update bundle ${{ env.OUTPUT_DIR }}"
+          title: "Update bundle ${{ env.OUTPUT_DIR }}"
           body: |
             Generated bundle with related images from `${{ env.IMAGE_LIST }}`.
 
