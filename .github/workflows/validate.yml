@@ -17,7 +17,7 @@ jobs:
       registry:
         image: registry:2
         ports:
-          - 5000:5000 
+          - 5000:5000
     steps:
       - uses: actions/checkout@v2
       - name: Set changed bundle version as variable
@@ -25,7 +25,7 @@ jobs:
           source scripts/find-changed-bundle.sh
           echo "BUNDLE_VERSION=$BUNDLE_VER" >> $GITHUB_ENV
       - name: Set bundle image name
-        run: echo "BUNDLE_IMAGE_NAME=localhost:5000/storageos/operator-bundle" >> $GITHUB_ENV 
+        run: echo "BUNDLE_IMAGE_NAME=localhost:5000/storageos/operator-bundle" >> $GITHUB_ENV
       - name: Set bundle image with tag
         run: echo "BUNDLE_IMAGE=${{ env.BUNDLE_IMAGE_NAME }}:v${{ env.BUNDLE_VERSION }}" >> $GITHUB_ENV
       - name: Build bundle image
@@ -34,3 +34,15 @@ jobs:
           docker push ${{ env.BUNDLE_IMAGE }}
       - name: opm validate the bundle
         run: make opm-validate
+
+  conftest-validate:
+    needs: find-bundle-change
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set changed bundle version as variable
+        run: |
+          source scripts/find-changed-bundle.sh
+          echo "BUNDLE_VERSION=$BUNDLE_VER" >> $GITHUB_ENV
+      - name: Run conftest
+        run: make conftest-validate

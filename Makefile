@@ -1,6 +1,12 @@
 OPM=bin/opm
 OPM_VERSION=v1.14.2
+
+CONFTEST=bin/conftest
+CONFTEST_VERSION=v0.21.0
+
 ARCH=amd64
+
+PROJECT_DIR=$(shell pwd)
 
 # Variables for building bundle image.
 BUNDLE_VERSION ?=
@@ -101,10 +107,25 @@ ifeq ($(BUNDLE_IMAGE),)
 endif
 	$(OPM) alpha bundle validate -t $(BUNDLE_IMAGE)
 
+conftest-validate: conftest ## Validate a bundle against repo policy (BUNDLE_VERSION required)
+ifeq ($(BUNDLE_VERSION),)
+	$(error BUNDLE_VERSION is a required argument)
+endif
+	$(CONFTEST) test $(PACKAGE_NAME)/$(BUNDLE_VERSION)/$(CSV_PATH) -o table
+
 ##@ Tools
 opm: ## Install opm.
 	@mkdir -p bin
 	@if [ ! -f $(OPM) ]; then \
 		curl -Lo $(OPM) https://github.com/operator-framework/operator-registry/releases/download/${OPM_VERSION}/linux-${ARCH}-opm ;\
 		chmod +x $(OPM) ;\
+	fi
+
+conftest: ## Install conftest
+	@mkdir -p bin
+	@if [ ! -f $(CONFTEST) ]; then \
+		cd /tmp; \
+		curl -Lo conftest.tar.gz https://github.com/open-policy-agent/conftest/releases/download/${CONFTEST_VERSION}/conftest_0.21.0_Linux_x86_64.tar.gz; \
+		tar zxvf conftest.tar.gz; \
+		cp conftest $(PROJECT_DIR)/$(CONFTEST); \
 	fi
