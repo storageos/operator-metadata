@@ -13,7 +13,7 @@ metadata:
     categories: Storage
     certified: 'true'
     containerImage: registry.connect.redhat.com/storageos/cluster-operator2:v2.2.0-4
-    createdAt: '2020-09-01T22:31:18Z'
+    createdAt: '2020-09-01T22:35:18Z'
     description: Cloud-native, persistent storage for containers.
     operators.operatorframework.io/internal-objects: "[\n  \"jobs.storageos.com\"\
       ,\n  \"storageosupgrades.storageos.com\",\n  \"nfsservers.storageos.com\"\n]"
