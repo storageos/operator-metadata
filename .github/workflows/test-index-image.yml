@@ -1,12 +1,9 @@
 name: Test index image
 
 on:
-  push:
-    branch:
+  pull_request:
+    branches:
       - master
-
-env:
-  BUNDLE_VERSION: "2.2.0"
 
 jobs:
   build-and-test-image:
@@ -15,8 +12,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Print all the env vars
-        run: env
+      - name: Find changed bundle and set variables
+        run: |
+          source scripts/find-changed-bundle.sh
+          echo "BUNDLE_VERSION=$BUNDLE_VERSION" >> $GITHUB_ENV
       - name: Set bundle image name
         run: echo "BUNDLE_IMAGE_NAME=ghcr.io/storageos/operator-bundle" >> $GITHUB_ENV
       - name: Set versioned bundle image with tag
