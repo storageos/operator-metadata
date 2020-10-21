@@ -1,0 +1,39 @@
+name: Publish bundle image to redhat registry
+
+on:
+  workflow_dispatch:
+    # Enable manual trigger of this action.
+    inputs:
+      packageName:
+        description: OLM package name.
+        default: storageos2
+        required: true
+      bundleVersion:
+        description: Bundle version to publish, e.g. `2.2.0`.
+        required: true
+      imageTag:
+        description: Bundle image tag, e.g. `2.2.0-4`.
+        required: true
+
+jobs:
+  publish-image:
+    runs-on: ubuntu-latest
+    name: Publish bundle image
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Login to container registry
+        uses: docker/login-action@v1
+        with:
+          registry: scan.connect.redhat.com
+          username: ${{ secrets.RH_USERNAME }}
+          password: ${{ secrets.RH_TOKEN }}
+      - name: Set env vars
+        run: |
+          echo "PACKAGE_NAME=${{ github.event.inputs.packageName }}" >> $GITHUB_ENV
+          echo "BUNDLE_VERSION=${{ github.event.inputs.bundleVersion }}" >> $GITHUB_ENV
+          echo "BUNDLE_IMAGE=scan.connect.redhat.com/${{ secrets.OSPID }}/storageos-bundle:${{ github.event.inputs.imageTag }}" >> $GITHUB_ENV
+      - name: Build bundle images and publish
+        run: |
+          make bundle-build
+          docker push $BUNDLE_IMAGE
