@@ -1,7 +1,9 @@
 - name: RELATED_IMAGE_STORAGEOS_NODE
-  value: registry.connect.redhat.com/storageos/node:v2.2.0
+  value: registry.connect.redhat.com/storageos/node:v2.3.0
 - name: RELATED_IMAGE_STORAGEOS_INIT
-  value: registry.connect.redhat.com/storageos/init:v2.0.0
+  value: registry.connect.redhat.com/storageos/init:v2.1.0
+- name: RELATED_IMAGE_API_MANAGER
+  value: registry.connect.redhat.com/storageos/api-manager:v1.0.0
 - name: RELATED_IMAGE_CSIV1_CLUSTER_DRIVER_REGISTRAR
   value: registry.connect.redhat.com/storageos/csi-cluster-driver-registrar:v1.0.1
 - name: RELATED_IMAGE_CSIV1_NODE_DRIVER_REGISTRAR
@@ -19,4 +21,4 @@
 - name: RELATED_IMAGE_KUBE_SCHEDULER
   value: registry.connect.redhat.com/storageos/kube-scheduler:v1.17.0
 - name: OPERATOR_IMAGE
-  value: registry.connect.redhat.com/storageos/cluster-operator2:v2.2.0-4
+  value: registry.connect.redhat.com/storageos/cluster-operator2:v2.3.0
