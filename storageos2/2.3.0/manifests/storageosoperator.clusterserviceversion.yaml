@@ -451,7 +451,7 @@ spec:
                 - get
                 - create
                 - update
-          serviceAccountName: storageos-operator
+          serviceAccountName: storageoscluster-operator-sa
       deployments:
         - name: storageos-cluster-operator
           spec:
