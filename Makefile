@@ -4,6 +4,9 @@ OPM_VERSION=v1.14.2
 CONFTEST=bin/conftest
 CONFTEST_VERSION=v0.21.0
 
+YQ=bin/yq
+YQ_VERSION=3.4.0
+
 ARCH=amd64
 
 PROJECT_DIR=$(shell pwd)
@@ -128,4 +131,11 @@ conftest: ## Install conftest
 		curl -Lo conftest.tar.gz https://github.com/open-policy-agent/conftest/releases/download/${CONFTEST_VERSION}/conftest_0.21.0_Linux_x86_64.tar.gz; \
 		tar zxvf conftest.tar.gz; \
 		cp conftest $(PROJECT_DIR)/$(CONFTEST); \
+	fi
+
+yq: ## Install yq.
+	mkdir -p bin
+	@if [ ! -f $(YQ) ]; then \
+		curl -Lo $(YQ) https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${ARCH} ;\
+		chmod +x $(YQ) ;\
 	fi
