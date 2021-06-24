@@ -1,5 +1,5 @@
 - name: RELATED_IMAGE_STORAGEOS_NODE
-  value: registry.connect.redhat.com/storageos/node:v2.4.0
+  value: registry.connect.redhat.com/storageos/node:v2.4.0-1
 - name: RELATED_IMAGE_STORAGEOS_INIT
   value: registry.connect.redhat.com/storageos/init:v2.1.0-1
 - name: RELATED_IMAGE_API_MANAGER
